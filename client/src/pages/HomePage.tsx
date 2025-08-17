@@ -3,13 +3,25 @@ import { ArrowRight, Star, Truck, Shield, Headphones, RefreshCw, ShoppingCart, H
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ProductGridSkeleton } from '@/components/ui/product-skeleton'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { mockProducts } from '@/data/mockData'
+import { useLoading, LoadingKeys } from '@/hooks/useLoading'
+import { useEffect } from 'react'
 
 export default function HomePage() {
+    const { isLoading, withLoading } = useLoading()
     const featuredProducts = mockProducts.slice(0, 8)
+
+    // Simulate loading featured products
+    useEffect(() => {
+        withLoading(LoadingKeys.PRODUCTS, async () => {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1200))
+        }, 600) // Minimum 600ms for better UX
+    }, [])
 
     return (
         <div className="min-h-screen">
@@ -217,9 +229,51 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                        {featuredProducts.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                        {isLoading(LoadingKeys.PRODUCTS) ? (
+                            // Use ProductGridSkeleton but only show 8 items
+                            Array.from({ length: 8 }).map((_, index) => (
+                                <div key={index} className="animate-in slide-in-from-bottom" style={{ animationDelay: `${index * 100}ms` }}>
+                                    <Card className="group relative overflow-hidden shadow-lg">
+                                        <CardContent className="p-0">
+                                            <div className="relative aspect-square overflow-hidden">
+                                                <div className="w-full h-full bg-gradient-to-br from-muted/50 to-muted animate-pulse" />
+                                            </div>
+                                            <div className="p-6 space-y-4">
+                                                <div className="space-y-2">
+                                                    <div className="h-6 bg-muted rounded animate-pulse" />
+                                                    <div className="h-6 bg-muted rounded w-3/4 animate-pulse" />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="flex space-x-1">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <div key={i} className="h-4 w-4 bg-muted rounded-full animate-pulse" />
+                                                            ))}
+                                                        </div>
+                                                        <div className="h-4 w-8 bg-muted rounded animate-pulse" />
+                                                    </div>
+                                                    <div className="h-5 w-16 bg-muted rounded-full animate-pulse" />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="h-6 w-20 bg-muted rounded animate-pulse" />
+                                                    <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            ))
+                        ) : (
+                            featuredProducts.map((product, index) => (
+                                <div
+                                    key={product.id}
+                                    className="animate-in slide-in-from-bottom"
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                >
+                                    <ProductCard product={product} />
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     <div className="text-center">

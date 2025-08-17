@@ -4,9 +4,11 @@ import { Star, Heart, ShoppingCart, Eye, Plus, Zap, Award, GitCompare, Sparkles,
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useComparison } from '@/contexts/ComparisonContext'
+import { useQuickView } from '@/contexts/QuickViewContext'
 import type { Product } from '@/types'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -19,6 +21,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist()
   const { addItem: addToComparison, removeItem: removeFromComparison, isInComparison, canAddMore } = useComparison()
+  const { openQuickView } = useQuickView()
   const [isLoading, setIsLoading] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -105,18 +108,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-0">
         <Link to={`/product/${product.id}`}>
           <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted/30 to-muted/60">
-            {/* Image with loading state */}
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-br from-muted/50 to-muted animate-pulse",
-              imageLoaded && "opacity-0"
-            )} />
-            <img
+            {/* Optimized image with lazy loading */}
+            <OptimizedImage
               src={product.image}
               alt={product.name}
-              className={cn(
-                "w-full h-full object-cover transition-all duration-700 group-hover:scale-110",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
+              width={400}
+              height={400}
+              className="transition-all duration-700 group-hover:scale-110"
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              priority={false}
               onLoad={() => setImageLoaded(true)}
             />
             
@@ -210,11 +210,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                   "bg-background/95 backdrop-blur-md hover:bg-background shadow-xl border border-border/50 transition-all duration-300",
                   "opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 delay-200"
                 )}
-                asChild
+                onClick={(e) => {
+                  e.preventDefault()
+                  openQuickView(product)
+                }}
               >
-                <Link to={`/product/${product.id}`}>
-                  <Eye className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                </Link>
+                <Eye className="h-4 w-4 text-muted-foreground hover:text-primary" />
               </Button>
             </div>
             

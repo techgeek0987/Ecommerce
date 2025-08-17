@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search, Filter, Grid, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,10 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ProductGridSkeleton } from '@/components/ui/product-skeleton'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { mockProducts } from '@/data/mockData'
+import { useLoading, LoadingKeys } from '@/hooks/useLoading'
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -18,8 +21,17 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('name')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500])
+  const { isLoading, withLoading } = useLoading()
 
   const categories = Array.from(new Set(mockProducts.map(p => p.category)))
+
+  // Simulate loading state on mount
+  useEffect(() => {
+    withLoading(LoadingKeys.PRODUCTS, async () => {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }, 800) // Minimum 800ms for better UX
+  }, [])
 
   const filteredProducts = useMemo(() => {
     let filtered = mockProducts.filter(product => {
@@ -189,7 +201,26 @@ export default function ProductsPage() {
             </div>
 
             {/* Products */}
-            {filteredProducts.length === 0 ? (
+            {isLoading(LoadingKeys.PRODUCTS) ? (
+              <div>
+                {/* Toolbar skeleton */}
+                <div className="flex justify-between items-center mb-6">
+                  <Skeleton className="h-4 w-48" />
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-48" />
+                    <div className="flex border rounded-md">
+                      <Skeleton className="h-9 w-9 rounded-r-none" />
+                      <Skeleton className="h-9 w-9 rounded-l-none" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Products skeleton */}
+                <ProductGridSkeleton 
+                  count={viewMode === 'grid' ? 9 : 6} 
+                />
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
               </div>

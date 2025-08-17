@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import MobileBottomNav from '@/components/MobileBottomNav'
+import GlobalQuickView from '@/components/GlobalQuickView'
 import HomePage from '@/pages/HomePage'
 import ProductsPage from '@/pages/ProductsPage'
 import ProductDetailPage from '@/pages/ProductDetailPage'
@@ -13,6 +15,7 @@ import SearchPage from '@/pages/SearchPage'
 import { CartProvider } from '@/contexts/CartContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { ComparisonProvider } from '@/contexts/ComparisonContext'
+import { QuickViewProvider } from '@/contexts/QuickViewContext'
 
 function App() {
   return (
@@ -20,6 +23,7 @@ function App() {
       <CartProvider>
         <WishlistProvider>
           <ComparisonProvider>
+            <QuickViewProvider>
             <Router>
               <div className="min-h-screen bg-background">
                 <Routes>
@@ -33,6 +37,13 @@ function App() {
                   <Route path="/comparison" element={<ComparisonPage />} />
                   <Route path="/search" element={<SearchPage />} />
                 </Routes>
+                
+                {/* Mobile Bottom Navigation */}
+                <MobileBottomNav />
+                
+                {/* Global Quick View Modal */}
+                <GlobalQuickView />
+                
                 <Toaster 
                   position="top-right"
                   expand={true}
@@ -41,6 +52,7 @@ function App() {
                 />
               </div>
             </Router>
+            </QuickViewProvider>
           </ComparisonProvider>
         </WishlistProvider>
       </CartProvider>
